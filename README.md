@@ -4,4 +4,6 @@ Meant to take a user's username and password, hash the password and store it in 
 
 Driver.java = driver code for testing
 
-User.java = all the underlying stuff 
+User.java = all the underlying stuff for storing in a database. Uses SQL commands to update the data.
+
+App.java = writing user info to a json file. 
