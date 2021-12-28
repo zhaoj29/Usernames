@@ -2,8 +2,6 @@
 
 Meant to take a user's username and password, hash the password and store it in a database. 
 
-Practice.java is testing connection to SQLite 
+Driver.java = driver code for testing
 
-Driver.java = driver code
-
-App.java = all the underlying stuff 
+User.java = all the underlying stuff 
