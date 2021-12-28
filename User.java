@@ -15,7 +15,7 @@ public class User {
         Connection conn = null;
         try {
             // db parameters
-            String url = "jdbc:sqlite:C:/Users/Jessica Zhao/Downloads/projects/cs/user_proj/test.db";
+            String url = "jdbc:sqlite:C:[INSERT PATH]/[FILE NAME].db";
             // create a connection to the database
        
             conn = DriverManager.getConnection(url);
