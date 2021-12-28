@@ -117,8 +117,8 @@ public class User {
     }
     private static String hash(String input){
 		try{
-			MessageDigest md5 = MessageDigest.getInstance("SHA-256");
-			byte[] msgDigest = md5.digest(input.getBytes());
+			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+			byte[] msgDigest = sha256.digest(input.getBytes());
 			
 			// Convert byte array into signum representation
 			BigInteger no = new BigInteger(1, msgDigest);
@@ -159,25 +159,5 @@ public class User {
         }
 	}
 	
-	private static String sha256(String input){
-		try{
-			MessageDigest md5 = MessageDigest.getInstance("SHA-256");
-			byte[] msgDigest = md5.digest(input.getBytes());
-			
-			// Convert byte array into signum representation
-			BigInteger no = new BigInteger(1, msgDigest);
-	
-			// Convert message digest into hex value
-			String hashtext = no.toString(16);
-			while (hashtext.length() < 32) {
-				hashtext = "0" + hashtext;
-			}
-			return hashtext;
-		}
-        // For specifying wrong message digest algorithms
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-	}
 	*/
 }
