@@ -28,7 +28,7 @@ public class User {
 
     public static void createNewTable() {
         // SQLite connection string
-        String url = "jdbc:sqlite:C://Users/Jessica Zhao/Downloads/projects/cs/user_proj/test.db";
+        String url = "jdbc:sqlite:C://[INSER PATH]/[FILE NAME].db";
         
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS users (\n"
