@@ -10,7 +10,7 @@ public class App{
 	
 	private JSONArray info; 
 
-	private final String  FILEPATH = "c:\\Users\\Jessica Zhao\\Downloads\\projects\\cs\\user_proj\\";
+	private final String  FILEPATH = "c:\\[INSERT PATH]";
 	
 	public App(){
 		logins = new HashMap<String, String>();
@@ -42,7 +42,7 @@ public class App{
 		info.add(newUser);
 		
 		try{
-			FileWriter file = new FileWriter("userFile.json");
+			FileWriter file = new FileWriter("[FILE NAME].json");
 			file.write(info.toJSONString()); 
             file.flush();
         } 
