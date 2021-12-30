@@ -1,4 +1,5 @@
 import java.security.*;
+import java.io.Console;
 import java.math.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,11 +12,12 @@ import java.util.*;
 
 public class User {
 
+    //connect to database file 
 	private static Connection connect() {
         Connection conn = null;
         try {
             // db parameters
-            String url = "jdbc:sqlite:C:[INSERT PATH]/[FILE NAME].db";
+            String url = "jdbc:sqlite:C:/[INSERT PATH]/[FILE NAME].db"; //should put this as param
             // create a connection to the database
        
             conn = DriverManager.getConnection(url);
@@ -28,7 +30,7 @@ public class User {
 
     public static void createNewTable() {
         // SQLite connection string
-        String url = "jdbc:sqlite:C://[INSER PATH]/[FILE NAME].db";
+        String url = "jdbc:sqlite:C://[INSERT PATH]/[FILE NAME].db"; //should ask user where they want file
         
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS users (\n"
@@ -45,42 +47,79 @@ public class User {
         }
     }
 
-    public static void insert(String user, String password){
+    public static void insert(){
+        //might put this in another function.. 
+            //used many times 
+        //ask user for credentials 
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String user = sc.nextLine();
 
+        //hide pw typing 
+        Console console = System.console();
+        System.out.print("Enter password: ");
+        char[] password = console.readPassword();
+
+        //do the queries 
         String sql = "INSERT INTO users(username,password) VALUES(?,?)";
-        String check ="SELECT * FROM users WHERE username = ?";
-        String hashed = hash(password);
+        String hashed = hash(Arrays.toString(password));
         //System.out.println("hashed pw: " + password);
+
         try (Connection conn = connect()){
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            PreparedStatement checkpstmt = conn.prepareStatement(check);
-            checkpstmt.setString(1, user);
-            ResultSet rs = checkpstmt.executeQuery();
 
-            //check if username exists in table 
-            while(rs.next()){ 
+            //check if username exists in table
+            String[] info = select(user);
+
+            while(info!=null){ 
+                //if it does, ask user to enter smthn else 
                 System.out.println("Username already exists. Please choose another.");
-                Scanner sc = new Scanner(System.in);
+                sc = new Scanner(System.in);
                 System.out.print("Enter username: ");
                 user = sc.nextLine();
+                console = System.console();
                 System.out.print("Enter password: ");
-                password = sc.nextLine();
-                check ="SELECT * FROM users WHERE username = ?";
+                password = console.readPassword();
+                hashed = hash(Arrays.toString(password));
                 pstmt = conn.prepareStatement(sql);
-                checkpstmt = conn.prepareStatement(check);
-                checkpstmt.setString(1, user);
-                rs = checkpstmt.executeQuery();
-                
+                info = select(user);
             }
-            //sc.close();
+            sc.close();
             
             pstmt.setString(1, user);
             pstmt.setString(2, hashed);
             pstmt.executeUpdate();
-        } catch (SQLException e) {
+
+            //replace password arr w/ space to avoid any malicious code from accessing it 
+            Arrays.fill(password, ' ');
+        } 
+        catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         
+    }
+
+
+    private static String[] select(String user){
+        String query ="SELECT * FROM users WHERE username = ?";
+        try(Connection conn = connect();
+            PreparedStatement checkpstmt = conn.prepareStatement(query)){
+
+            checkpstmt.setString(1, user);
+            ResultSet rs = checkpstmt.executeQuery();
+            if(rs.next()){ //if username exists 
+                String[] info = {rs.getString("username"), rs.getString("password")};
+                return info;
+            }
+            else{
+                return null;
+            }
+            
+        }
+        catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     public static void selectAll(){
@@ -114,6 +153,70 @@ public class User {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public static void login(){
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String user = sc.nextLine();
+
+        //hide pw typing 
+        Console console = System.console();
+        System.out.print("Enter password: ");
+        char[] password = console.readPassword();
+        //hash pw 
+        String hashed = hash(Arrays.toString(password));
+
+        int tries = 0; //give 3 tries 
+        String[] info = select(user);
+        while(tries<3){
+            if(info !=null){
+                //System.out.println("username exists"); //this works
+                //String storedUser = info[0];
+                String storedPW = info[1];
+                //System.out.println(storedPW);
+                //System.out.println(storedUser);
+                
+                //if credentials incorrect
+                //System.out.println("checking credentials");
+                if(!hashed.equals(storedPW)){
+                    //System.out.println("username and/or password typed incorrectly.");
+                    System.out.println("Invalid username and/or password. Please try again.");
+                    System.out.print("Enter username: ");
+                    user = sc.nextLine();
+                    console = System.console();
+                    System.out.print("Enter password: ");
+                    password = console.readPassword();
+                    //hash pw 
+                    hashed = hash(Arrays.toString(password));
+                    tries++;
+                }
+                else{
+                    System.out.println("Login successful. Welcome!");
+                    break;
+                }
+                
+            }
+            //or if doesn't exist in database 
+            else{
+                //System.out.println("Username does not exist.");
+                System.out.println("Invalid username and/or password. Please try again.");
+                System.out.print("Enter username: ");
+                user = sc.nextLine();
+                console = System.console();
+                System.out.print("Enter password: ");
+                password = console.readPassword();
+                //hash pw 
+                hashed = hash(Arrays.toString(password));
+                tries++;
+            } 
+            info = select(user);
+        }
+        sc.close();
+        if(tries>=3){
+            System.out.println("Unsuccessful login attempt too many times. Please try again later.");
+        }
+        
     }
     private static String hash(String input){
 		try{
