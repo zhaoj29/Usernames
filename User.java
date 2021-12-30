@@ -216,6 +216,7 @@ public class User {
         if(tries>=3){
             System.out.println("Unsuccessful login attempt too many times. Please try again later.");
         }
+	Arrays.fill(password, ' ');
         
     }
     private static String hash(String input){
