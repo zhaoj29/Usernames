@@ -11,26 +11,11 @@ import java.sql.Statement;
 import java.util.*;
 
 public class User {
-
-    //connect to database file 
-	private static Connection connect() {
-        Connection conn = null;
-        try {
-            // db parameters
-            String url = "jdbc:sqlite:C:/[INSERT PATH]/[FILE NAME].db"; //should put this as param
-            // create a connection to the database
-       
-            conn = DriverManager.getConnection(url);
-        }
-        catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return conn;
-    }
+    private static final int NUM_TRIES = 3;
 
     public static void createNewTable() {
         // SQLite connection string
-        String url = "jdbc:sqlite:C://[INSERT PATH]/[FILE NAME].db"; //should ask user where they want file
+        String url = "jdbc:sqlite:C://[PATH]/[FILE NAME].db"; //should ask user where they want file
         
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS users (\n"
@@ -99,29 +84,6 @@ public class User {
         
     }
 
-
-    private static String[] select(String user){
-        String query ="SELECT * FROM users WHERE username = ?";
-        try(Connection conn = connect();
-            PreparedStatement checkpstmt = conn.prepareStatement(query)){
-
-            checkpstmt.setString(1, user);
-            ResultSet rs = checkpstmt.executeQuery();
-            if(rs.next()){ //if username exists 
-                String[] info = {rs.getString("username"), rs.getString("password")};
-                return info;
-            }
-            else{
-                return null;
-            }
-            
-        }
-        catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
-    }
-
     public static void selectAll(){
         String sql = "SELECT username, password FROM users";
         
@@ -169,7 +131,7 @@ public class User {
 
         int tries = 0; //give 3 tries 
         String[] info = select(user);
-        while(tries<3){
+        while(tries<NUM_TRIES){
             if(info !=null){
                 //System.out.println("username exists"); //this works
                 //String storedUser = info[0];
@@ -216,9 +178,53 @@ public class User {
         if(tries>=3){
             System.out.println("Unsuccessful login attempt too many times. Please try again later.");
         }
-	Arrays.fill(password, ' ');
+        Arrays.fill(password, ' ');
         
     }
+
+    /*****************************************************************/
+    /******************* ALL THE PRIVATE METHODS *********************/
+    /*****************************************************************/
+
+    //connect to database file 
+	private static Connection connect() {
+        Connection conn = null;
+        try {
+            // db parameters
+            String url = "jdbc:sqlite:C:/[PATH]/[FILE NAME].db"; //should put this as param
+            // create a connection to the database
+       
+            conn = DriverManager.getConnection(url);
+        }
+        catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return conn;
+    }
+
+    private static String[] select(String user){
+        String query ="SELECT * FROM users WHERE username = ?";
+        try(Connection conn = connect();
+            PreparedStatement checkpstmt = conn.prepareStatement(query)){
+
+            checkpstmt.setString(1, user);
+            ResultSet rs = checkpstmt.executeQuery();
+            if(rs.next()){ //if username exists 
+                String[] info = {rs.getString("username"), rs.getString("password")};
+                return info;
+            }
+            else{
+                return null;
+            }
+            
+        }
+        catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    
+
     private static String hash(String input){
 		try{
 			MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
